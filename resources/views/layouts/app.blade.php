@@ -32,15 +32,9 @@
                     <i data-lucide="book-open" class="icon"></i> Subjects
                 </a>
 
-                @if (Route::has('majors.index'))
-                    <a href="{{ route('majors.index') }}" class="nav-link">
-                        <i data-lucide="graduation-cap" class="icon"></i> Majors
-                    </a>
-                @else
-                    <a href="#" class="nav-link">
-                        <i data-lucide="message-square" class="icon"></i> Threads
-                    </a>
-                @endif
+                <a href="{{ route('majors.index') }}" class="nav-link">
+                    <i data-lucide="graduation-cap" class="icon"></i> Majors
+                </a>
             </nav>
 
             <div class="header-search">
@@ -57,19 +51,19 @@
 
             <div class="header-actions">
                 @auth
-                    <a href="#" class="avatar avatar-md avatar-filled" style="text-decoration:none;">
-                        {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
-                    </a>
+                    <span style="font-size: 0.875rem; color: var(--muted-fg);">
+                        {{ auth()->user()->name }}
+                    </span>
+                    <form method="POST" action="{{ route('logout') }}" style="margin:0;">
+                        @csrf
+                        <button type="submit" class="btn btn-outline btn-sm">Logout</button>
+                    </form>
                 @else
-                    @if (Route::has('login'))
-                        <a href="{{ route('login') }}" class="btn btn-outline btn-sm">Login</a>
-                    @endif
-
-                    @if (Route::has('register'))
-                        <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Register</a>
-                    @endif
+                    <a href="{{ route('login') }}" class="btn btn-outline btn-sm">Login</a>
+                    <a href="{{ route('register') }}" class="btn btn-primary btn-sm">Register</a>
                 @endauth
             </div>
+
         </div>
     </div>
 </header>
