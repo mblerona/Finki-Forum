@@ -16,7 +16,7 @@
             </div>
 
             <div style="padding:1.5rem;">
-                <form method="POST" action="{{ route('threads.store') }}">
+                <form method="POST" action="{{ route('threads.store') }}" enctype="multipart/form-data">
                     @csrf
 
                     <div class="form-group">
@@ -81,43 +81,57 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Tags (optional, later)</label>
-                        <div style="display:flex;gap:0.5rem;">
-                            <input type="text" class="input" placeholder="Add a tag." style="flex:1;" disabled>
-                            <button type="button" class="btn btn-secondary" disabled>Add</button>
+                        <label>Tags (optional)</label>
+                        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.25rem;">
+                            @foreach($tags as $tag)
+                                <label style="cursor:pointer;">
+                                    <input
+                                        type="checkbox"
+                                        name="tags[]"
+                                        value="{{ $tag->id }}"
+                                        class="checkbox"
+                                        style="display:none;"
+                                        {{ is_array(old('tags')) && in_array($tag->id, old('tags')) ? 'checked' : '' }}
+                                    >
+                                    <span class="tag-btn badge badge-secondary" style="
+                                        padding: 0.375rem 0.75rem;
+                                        cursor: pointer;
+                                        transition: all 150ms ease;
+                                        user-select: none;
+                                    ">
+                                        + {{ $tag->name }}
+                                    </span>
+                                </label>
+                            @endforeach
                         </div>
-                        <div style="margin-top:0.75rem;">
-                            <p style="font-size:0.75rem;color:var(--muted-fg);margin-bottom:0.5rem;">Popular tags:</p>
-                            <div style="display:flex;flex-wrap:wrap;gap:0.25rem;">
-                                <button type="button" class="btn btn-ghost btn-sm" style="font-size:0.75rem;" disabled>+ exam</button>
-                                <button type="button" class="btn btn-ghost btn-sm" style="font-size:0.75rem;" disabled>+ help</button>
-                                <button type="button" class="btn btn-ghost btn-sm" style="font-size:0.75rem;" disabled>+ lab</button>
-                                <button type="button" class="btn btn-ghost btn-sm" style="font-size:0.75rem;" disabled>+ project</button>
-                                <button type="button" class="btn btn-ghost btn-sm" style="font-size:0.75rem;" disabled>+ resources</button>
-                                <button type="button" class="btn btn-ghost btn-sm" style="font-size:0.75rem;" disabled>+ discussion</button>
-                            </div>
-                        </div>
+                        <p class="form-hint">Click to toggle tags</p>
                     </div>
 
                     <div class="form-group">
-                        <label>Attachments (optional, later)</label>
-                        <div style="display:flex;gap:0.5rem;">
-                            <button type="button" class="btn btn-outline btn-sm" disabled>
-                                <i data-lucide="upload" class="icon-sm"></i> Upload File
-                            </button>
-                            <button type="button" class="btn btn-outline btn-sm" disabled>
-                                <i data-lucide="link-2" class="icon-sm"></i> Add Link
-                            </button>
-                        </div>
-                        <p class="form-hint">Attachments will be added later.</p>
+                        <label for="file">Attachment (optional)</label>
+                        <input
+                            type="file"
+                            name="file"
+                            id="file"
+                            class="input"
+                            accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx,.xls,.xlsx"
+                            style="padding: 0.375rem;"
+                        >
+                        <p class="form-hint">Allowed: PDF, images, Word, Excel — max 10MB</p>
+
+                        @error('file')
+                        <p class="form-hint" style="color:var(--destructive);">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div style="display:flex;align-items:center;gap:0.75rem;background:rgba(237,238,243,0.5);padding:1rem;border-radius:var(--radius);margin-bottom:1.5rem;">
-                        <input type="checkbox" class="checkbox" id="anonymous" disabled />
+                        <input type="checkbox" class="checkbox" id="anonymous" name="anonymous" value="1"
+                            {{ old('anonymous') ? 'checked' : '' }}
+                        />
                         <div>
                             <label for="anonymous" style="margin-bottom:0;cursor:pointer;">Post anonymously</label>
                             <p style="font-size:0.75rem;color:var(--muted-fg);margin-top:0.125rem;">
-                                Anonymous posting will be added later.
+                                Your name will not be shown on this thread.
                             </p>
                         </div>
                     </div>
@@ -137,5 +151,24 @@
             </div>
         </div>
     </main>
+
+    <script>
+        document.querySelectorAll('input[name="tags[]"]').forEach(function(checkbox) {
+            const span = checkbox.nextElementSibling;
+
+            function updateStyle() {
+                if (checkbox.checked) {
+                    span.style.backgroundColor = 'var(--primary)';
+                    span.style.color = 'var(--primary-fg)';
+                } else {
+                    span.style.backgroundColor = '';
+                    span.style.color = '';
+                }
+            }
+
+            updateStyle();
+            checkbox.addEventListener('change', updateStyle);
+        });
+    </script>
 
 @endsection

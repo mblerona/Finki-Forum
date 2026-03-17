@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             SemesterSeeder::class,
             MajorSeeder::class,
             SubjectSeeder::class,
+            TagSeeder::class,
         ]);
 
         User::firstOrCreate(

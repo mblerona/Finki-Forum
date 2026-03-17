@@ -16,7 +16,7 @@ class ThreadController extends Controller
 //    }
     public function show(Thread $thread)
     {
-        $thread->load(['replies.user', 'likes']);
+        $thread->load(['replies.user', 'likes', 'tags']);
 
         $isLiked = auth()->check()
             ? $thread->likes->contains('user_id', auth()->id())
@@ -28,25 +28,46 @@ class ThreadController extends Controller
     public function create()
     {
         $subjects = Subject::all();
-
-        return view('threads.create', compact('subjects'));
+        $tags = \App\Models\Tag::all();
+        return view('threads.create', compact('subjects', 'tags'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|max:255',
-            'content' => 'required',
+            'title'      => 'required|max:255',
+            'content'    => 'required',
             'subject_id' => 'required|exists:subjects,id',
+            'file'       => 'nullable|file|mimes:pdf,jpg,jpeg,png,gif,doc,docx,xls,xlsx|max:10240',
+            'tags'       => 'nullable|array',
+            'tags.*'     => 'exists:tags,id',
         ]);
 
+        $filePath = null;
+        $fileName = null;
+
+        if ($request->hasFile('file')) {
+            $file     = $request->file('file');
+            $fileName = $file->getClientOriginalName();
+            $filePath = $file->store('thread-files', 'public');
+        }
+
         $thread = Thread::create([
-            'title' => $request->input('title'),
-            'content' => $request->input('content'),
-            'subject_id' => $request->input('subject_id'),
-            'user_id' => auth()->id() ?? 1,
+            'title'        => $request->input('title'),
+            'content'      => $request->input('content'),
+            'subject_id'   => $request->input('subject_id'),
+            'user_id'      => auth()->id(),
+            'file_path'    => $filePath,
+            'file_name'    => $fileName,
+            'is_anonymous' => $request->boolean('anonymous'),
         ]);
+
+        if ($request->has('tags')) {
+            $thread->tags()->attach($request->input('tags'));
+        }
 
         return redirect()->route('threads.show', $thread->id);
     }
+
+
 }

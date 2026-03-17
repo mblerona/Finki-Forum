@@ -27,32 +27,59 @@
             </div>
         </div>
 
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;gap:1rem;flex-wrap:wrap;">
             <h2>Threads</h2>
 
             @auth
-                @if (Route::has('threads.create'))
-                    <a href="{{ route('threads.create') }}" class="btn btn-primary btn-sm">
-                        <i data-lucide="plus" class="icon-sm"></i>
-                        New Thread
-                    </a>
-                @endif
+                <a href="{{ route('threads.create') }}" class="btn btn-primary btn-sm">
+                    <i data-lucide="plus" class="icon-sm"></i>
+                    New Thread
+                </a>
             @endauth
         </div>
 
-        @if($subject->threads->isEmpty())
+        {{-- Tag filter --}}
+        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.5rem;align-items:center;">
+            <span style="font-size:0.875rem;color:var(--muted-fg);">Filter by tag:</span>
+
+            <a href="{{ route('subjects.show', $subject->id) }}"
+               class="badge {{ !$selectedTag ? 'badge-primary' : 'badge-secondary' }}"
+               style="cursor:pointer;padding:0.375rem 0.75rem;text-decoration:none;">
+                All
+            </a>
+
+            @foreach($tags as $tag)
+                <a href="{{ route('subjects.show', $subject->id) }}?tag={{ $tag->name }}"
+                   class="badge {{ $selectedTag === $tag->name ? 'badge-primary' : 'badge-secondary' }}"
+                   style="cursor:pointer;padding:0.375rem 0.75rem;text-decoration:none;">
+                    {{ $tag->name }}
+                </a>
+            @endforeach
+        </div>
+
+        @if($threads->isEmpty())
             <div class="card" style="padding: 1.5rem;">
                 <h3>No threads yet</h3>
-                <p>This subject does not have any discussions yet.</p>
+                <p>
+                    {{ $selectedTag ? 'No threads with the tag "' . $selectedTag . '".' : 'This subject does not have any discussions yet.' }}
+                </p>
             </div>
         @else
             <div class="stack-sm">
-                @foreach($subject->threads as $thread)
+                @foreach($threads as $thread)
                     <div class="card thread-card" style="padding: 1rem;">
                         <div class="thread-content">
                             <div class="thread-badges">
                                 <span class="badge badge-outline">{{ $subject->name }}</span>
                             </div>
+
+                            @if($thread->tags->isNotEmpty())
+                                <div class="thread-tags" style="margin-bottom: 0.5rem;">
+                                    @foreach($thread->tags as $tag)
+                                        <span class="badge badge-primary">{{ $tag->name }}</span>
+                                    @endforeach
+                                </div>
+                            @endif
 
                             <h3 style="margin-bottom: 0.5rem;">
                                 <a href="{{ route('threads.show', $thread->id) }}" style="text-decoration:none;color:inherit;">
@@ -66,10 +93,15 @@
 
                             <div class="thread-meta" style="margin-bottom: 1rem;">
                                 <span class="thread-meta-item">
-                                    <span class="avatar avatar-sm avatar-primary">
-                                        {{ strtoupper(substr($thread->user->name, 0, 2)) }}
-                                    </span>
-                                    {{ $thread->user->name }}
+                                    @if($thread->is_anonymous)
+                                        <span class="avatar avatar-sm avatar-primary">AN</span>
+                                        Anonymous
+                                    @else
+                                        <span class="avatar avatar-sm avatar-primary">
+                                            {{ strtoupper(substr($thread->user->name, 0, 2)) }}
+                                        </span>
+                                        {{ $thread->user->name }}
+                                    @endif
                                 </span>
 
                                 <span class="thread-meta-item">

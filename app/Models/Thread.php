@@ -12,7 +12,10 @@ class Thread extends Model
         'title',
         'content',
         'subject_id',
-        'user_id'
+        'user_id',
+        'file_path',
+        'file_name',
+        'is_anonymous',
     ];
     public function user()
     {
@@ -30,5 +33,10 @@ class Thread extends Model
     public function likes()
     {
         return $this->hasMany(ThreadLike::class);
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'thread_tag');
     }
 }

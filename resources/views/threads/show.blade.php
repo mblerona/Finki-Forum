@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@php use Illuminate\Support\Facades\Storage; @endphp
+
 @section('title', $thread->title)
 
 @section('content')
@@ -20,16 +22,54 @@
 
             <h1 style="margin-bottom: 1rem;">{{ $thread->title }}</h1>
 
+            @if($thread->tags->isNotEmpty())
+                <div class="thread-tags" style="margin-bottom: 1rem;">
+                    @foreach($thread->tags as $tag)
+                        <span class="badge badge-primary">{{ $tag->name }}</span>
+                    @endforeach
+                </div>
+            @endif
+
             <p style="margin-bottom: 1.5rem; white-space: pre-line;">
                 {{ $thread->content }}
             </p>
 
+            @if($thread->file_path)
+                <div class="post-attachments">
+                    <h4>
+                        <i data-lucide="paperclip" class="icon-sm"></i>
+                        Attachment
+                    </h4>
+
+                    @php
+                        $ext = strtolower(pathinfo($thread->file_name, PATHINFO_EXTENSION));
+                        $icon = match(true) {
+                            $ext === 'pdf'                               => 'file-text',
+                            in_array($ext, ['jpg','jpeg','png','gif'])   => 'image',
+                            in_array($ext, ['doc','docx'])               => 'file',
+                            in_array($ext, ['xls','xlsx'])               => 'file-spreadsheet',
+                            default                                      => 'paperclip',
+                        };
+                    @endphp
+
+                    <a href="{{ Storage::url($thread->file_path) }}" target="_blank" class="attachment-item">
+                        <i data-lucide="{{ $icon }}" class="icon-sm"></i>
+                        {{ $thread->file_name }}
+                    </a>
+                </div>
+            @endif
+
             <div class="thread-meta" style="margin-bottom: 1rem;">
                 <span class="thread-meta-item">
-                    <span class="avatar avatar-sm avatar-primary">
-                        {{ strtoupper(substr($thread->user->name, 0, 2)) }}
-                    </span>
-                    {{ $thread->user->name }}
+                    @if($thread->is_anonymous)
+                        <span class="avatar avatar-sm avatar-primary">AN</span>
+                        Anonymous
+                    @else
+                        <span class="avatar avatar-sm avatar-primary">
+                            {{ strtoupper(substr($thread->user->name, 0, 2)) }}
+                        </span>
+                        {{ $thread->user->name }}
+                    @endif
                 </span>
 
                 <span class="thread-meta-item">
@@ -65,15 +105,15 @@
                 </div>
 
                 <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
-        <span class="post-stat">
-            <i data-lucide="heart" class="icon"></i>
-            {{ $thread->likes->count() }} likes
-        </span>
+                    <span class="post-stat">
+                        <i data-lucide="heart" class="icon"></i>
+                        {{ $thread->likes->count() }} likes
+                    </span>
 
                     <span class="post-stat">
-            <i data-lucide="message-square" class="icon"></i>
-            {{ $thread->replies->count() }} replies
-        </span>
+                        <i data-lucide="message-square" class="icon"></i>
+                        {{ $thread->replies->count() }} replies
+                    </span>
                 </div>
             </div>
         </div>
@@ -149,7 +189,7 @@
             document.addEventListener('DOMContentLoaded', function () {
                 const toggleButton = document.getElementById('toggle-reply-form');
                 const cancelButton = document.getElementById('cancel-reply-form');
-                const formWrapper = document.getElementById('reply-form-wrapper');
+                const formWrapper  = document.getElementById('reply-form-wrapper');
 
                 if (toggleButton && formWrapper) {
                     toggleButton.addEventListener('click', function () {
