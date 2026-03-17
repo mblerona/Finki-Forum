@@ -35,6 +35,10 @@
                 <a href="{{ route('majors.index') }}" class="nav-link">
                     <i data-lucide="graduation-cap" class="icon"></i> Majors
                 </a>
+
+                <a href="{{ route('semesters.index') }}" class="nav-link">
+                    <i data-lucide="calendar" class="icon"></i> Semesters
+                </a>
             </nav>
 
             <div class="header-search">

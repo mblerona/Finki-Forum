@@ -3,19 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Models\Subject;
+use App\Models\Semester;
 use App\Models\Tag;
 
 class SubjectController extends Controller
 {
     public function index()
     {
-        $semesters = \App\Models\Semester::with(['subjects' => function($query) {
-            $query->with('majors')->withCount('threads');
-        }])
-            ->orderBy('name')
+        $semesters = Semester::orderBy('name')->get();
+        $selectedSemester = request('semester');
+        $search = request('search');
+
+        $subjects = Subject::with(['semester', 'majors'])
+            ->withCount('threads')
+            ->when($search, function($query) use ($search) {
+                $query->where('name', 'like', '%' . $search . '%');
+            })
+            ->when($selectedSemester, function($query) use ($selectedSemester) {
+                $query->whereHas('semester', function($q) use ($selectedSemester) {
+                    $q->where('name', $selectedSemester);
+                });
+            })
             ->get();
 
-        return view('subjects.index', compact('semesters'));
+        return view('subjects.index', compact('subjects', 'semesters', 'selectedSemester', 'search'));
     }
 
     public function show($id)
@@ -29,9 +40,7 @@ class SubjectController extends Controller
         ])->findOrFail($id);
 
         $tags = Tag::all();
-
         $selectedTag = request('tag');
-
         $threads = $subject->threads;
 
         if ($selectedTag) {

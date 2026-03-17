@@ -16,12 +16,7 @@
                     <a href="{{ route('subjects.index') }}" class="btn btn-primary">
                         Browse Subjects <i data-lucide="arrow-right" class="icon"></i>
                     </a>
-
-                    @if (Route::has('threads.create'))
-                        <a href="{{ route('threads.create') }}" class="btn btn-outline">Start a Discussion</a>
-                    @else
-                        <a href="#" class="btn btn-outline">Start a Discussion</a>
-                    @endif
+                    <a href="{{ route('threads.create') }}" class="btn btn-outline">Start a Discussion</a>
                 </div>
             </div>
 
@@ -51,17 +46,17 @@
                 </div>
             </a>
 
-            <a href="{{ route('subjects.index') }}" class="card category-card">
+            <a href="{{ route('majors.index') }}" class="card category-card">
                 <div class="category-icon"><i data-lucide="graduation-cap" class="icon-md"></i></div>
                 <h3>Majors</h3>
                 <p>Explore subjects and discussions by study program</p>
                 <div class="category-stats">
-                    <span>Many-to-many support</span>
+                    <span>6 programs</span>
                     <span>FINKI structure</span>
                 </div>
             </a>
 
-            <a href="{{ route('subjects.index') }}" class="card category-card">
+            <a href="{{ route('semesters.index') }}" class="card category-card">
                 <div class="category-icon"><i data-lucide="calendar" class="icon-md"></i></div>
                 <h3>Semesters</h3>
                 <p>Find subjects organized by semester</p>
@@ -71,7 +66,7 @@
                 </div>
             </a>
 
-            <a href="#" class="card category-card">
+            <a href="{{ route('threads.create') }}" class="card category-card">
                 <div class="category-icon"><i data-lucide="users" class="icon-md"></i></div>
                 <h3>Threads</h3>
                 <p>Read discussions, like posts, and comment on topics</p>

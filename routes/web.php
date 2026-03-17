@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MajorController;
 use App\Http\Controllers\ReplyController;
+use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\ThreadLikeController;
@@ -27,6 +28,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/majors', [MajorController::class, 'index'])->name('majors.index');
     Route::get('/majors/{major}', [MajorController::class, 'show'])->name('majors.show');
+
+    Route::get('/semesters', [SemesterController::class, 'index'])->name('semesters.index');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
