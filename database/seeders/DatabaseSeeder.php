@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             MajorSeeder::class,
             SubjectSeeder::class,
             TagSeeder::class,
+            ForumDemoSeeder::class,
         ]);
 
         User::firstOrCreate(
@@ -23,14 +24,14 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Admin', 'password' => bcrypt('FinkiForum26'), 'role' => 'admin']
         );
 
-        User::firstOrCreate(
-            ['email' => 'student@finki.edu.mk'],
-            ['name' => 'Test Student', 'password' => bcrypt('password'), 'role' => 'student']
-        );
-
-        User::firstOrCreate(
-            ['email' => 'student2@finki.edu.mk'],
-            ['name' => 'Student2', 'password' => bcrypt('password'), 'role' => 'student']
-        );
+//        User::firstOrCreate(
+//            ['email' => 'student@finki.edu.mk'],
+//            ['name' => 'Test Student', 'password' => bcrypt('password'), 'role' => 'student']
+//        );
+//
+//        User::firstOrCreate(
+//            ['email' => 'student2@finki.edu.mk'],
+//            ['name' => 'Student2', 'password' => bcrypt('password'), 'role' => 'student']
+//        );
     }
 }

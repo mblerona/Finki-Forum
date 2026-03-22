@@ -3,6 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
+use App\Filament\Resources\UserResource\RelationManagers\CommentsRelationManager;
+use App\Filament\Resources\UserResource\RelationManagers\ThreadsRelationManager;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -88,6 +90,11 @@ class UserResource extends Resource
                     ->label('Threads')
                     ->sortable(),
 
+                Tables\Columns\TextColumn::make('comments_count')
+                    ->counts('comments')
+                    ->label('Comments')
+                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable(),
@@ -100,6 +107,7 @@ class UserResource extends Resource
                     ]),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -115,15 +123,23 @@ class UserResource extends Resource
         return [
             'index' => Pages\ListUsers::route('/'),
             'create' => Pages\CreateUser::route('/create'),
+            'view' => Pages\ViewUser::route('/{record}'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }
 
+//    public static function getRelations(): array
+//    {
+//        return [
+//            RelationManagers\ThreadsRelationManager::class,
+//            RelationManagers\CommentsRelationManager::class,
+//        ];
+//    }
     public static function getRelations(): array
     {
         return [
-            RelationManagers\ThreadsRelationManager::class,
-            RelationManagers\RepliesRelationManager::class,
+            ThreadsRelationManager::class,
+            CommentsRelationManager::class,
         ];
     }
 }

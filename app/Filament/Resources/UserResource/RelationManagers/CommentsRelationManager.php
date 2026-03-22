@@ -7,11 +7,11 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
-class ThreadsRelationManager extends RelationManager
+class CommentsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'threads';
+    protected static string $relationship = 'comments';
 
-    protected static ?string $title = 'Threads';
+    protected static ?string $title = 'Comments';
 
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
@@ -20,27 +20,24 @@ class ThreadsRelationManager extends RelationManager
 
     public static function getBadge(Model $ownerRecord, string $pageClass): ?string
     {
-        return (string) $ownerRecord->threads()->count();
+        return (string) $ownerRecord->comments()->count();
     }
 
     public function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('title')
-                    ->searchable()
-                    ->limit(50),
+                Tables\Columns\TextColumn::make('content')
+                    ->limit(50)
+                    ->wrap(),
 
-                Tables\Columns\TextColumn::make('subject.name')
-                    ->label('Subject'),
+                Tables\Columns\TextColumn::make('thread.title')
+                    ->label('Thread')
+                    ->searchable(),
 
-                Tables\Columns\TextColumn::make('likes_count')
-                    ->counts('likes')
-                    ->label('Likes'),
-
-                Tables\Columns\TextColumn::make('comments_count')
-                    ->counts('comments')
-                    ->label('Comments'),
+                Tables\Columns\TextColumn::make('parent.id')
+                    ->label('Type')
+                    ->formatStateUsing(fn ($state) => $state ? 'Reply to comment' : 'Top-level comment'),
 
                 Tables\Columns\IconColumn::make('is_anonymous')
                     ->boolean()

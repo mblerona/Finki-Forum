@@ -16,15 +16,25 @@ class SearchController extends Controller
             return redirect()->route('home');
         }
 
+        $words = preg_split('/\s+/', trim($query), -1, PREG_SPLIT_NO_EMPTY);
+
         $subjects = Subject::with(['semester', 'majors'])
             ->withCount('threads')
-            ->where('name', 'like', '%' . $query . '%')
+            ->where(function ($q) use ($words) {
+                foreach ($words as $word) {
+                    $q->where('name', 'like', '%' . $word . '%');
+                }
+            })
             ->get();
 
         $threads = Thread::with(['subject', 'user', 'likes', 'replies', 'tags'])
-            ->where(function($q) use ($query) {
-                $q->where('title', 'like', '%' . $query . '%')
-                    ->orWhere('content', 'like', '%' . $query . '%');
+            ->where(function ($q) use ($words) {
+                foreach ($words as $word) {
+                    $q->where(function ($inner) use ($word) {
+                        $inner->where('title', 'like', '%' . $word . '%')
+                            ->orWhere('content', 'like', '%' . $word . '%');
+                    });
+                }
             })
             ->latest()
             ->get();

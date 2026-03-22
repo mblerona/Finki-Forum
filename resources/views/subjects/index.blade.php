@@ -23,10 +23,12 @@
                             <i data-lucide="search" class="input-icon icon"></i>
                             <input
                                 type="text"
+                                id="subject-search"
                                 name="search"
                                 class="input"
                                 placeholder="Search subjects..."
                                 value="{{ $search ?? '' }}"
+                                autocomplete="off"
                                 style="padding-left:2.25rem;"
                             >
                         </div>
@@ -37,7 +39,7 @@
                         <label style="font-size:0.875rem;font-weight:500;margin-bottom:0.375rem;display:block;">
                             Semester
                         </label>
-                        <select name="semester" class="input" style="cursor:pointer;">
+                        <select id="subject-semester" name="semester" class="input" style="cursor:pointer;">
                             <option value="">All Semesters</option>
                             @foreach($semesters as $semester)
                                 <option value="{{ $semester->name }}" {{ $selectedSemester === $semester->name ? 'selected' : '' }}>
@@ -47,14 +49,29 @@
                         </select>
                     </div>
 
+                    {{-- Major Filter --}}
+                    <div style="min-width:180px;">
+                        <label style="font-size:0.875rem;font-weight:500;margin-bottom:0.375rem;display:block;">
+                            Major
+                        </label>
+                        <select id="subject-major" name="major" class="input" style="cursor:pointer;">
+                            <option value="">All Majors</option>
+                            @foreach($majors as $major)
+                                <option value="{{ $major->id }}" {{ ($selectedMajor ?? '') == $major->id ? 'selected' : '' }}>
+                                    {{ $major->code }}{{ isset($major->name) ? ' — ' . $major->name : '' }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     {{-- Buttons --}}
                     <div style="display:flex;gap:0.5rem;">
-                        <button type="submit" class="btn btn-primary">
-                            <i data-lucide="filter" class="icon-sm"></i>
-                            Filter
-                        </button>
+{{--                        <button type="submit" class="btn btn-primary">--}}
+{{--                            <i data-lucide="filter" class="icon-sm"></i>--}}
+{{--                            Filter--}}
+{{--                        </button>--}}
 
-                        @if($search || $selectedSemester)
+                        @if($search || $selectedSemester || ($selectedMajor ?? ''))
                             <a href="{{ route('subjects.index') }}" class="btn btn-outline">
                                 <i data-lucide="x" class="icon-sm"></i>
                                 Clear
@@ -65,7 +82,7 @@
                 </div>
 
                 {{-- Active filters display --}}
-                @if($search || $selectedSemester)
+                @if($search || $selectedSemester || ($selectedMajor ?? ''))
                     <div style="margin-top:0.75rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
                         <span style="font-size:0.8rem;color:var(--muted-fg);">Active filters:</span>
 
@@ -81,11 +98,20 @@
                             </span>
                         @endif
 
+                        @if($selectedMajor ?? '')
+                            @php $activeMajor = $majors->firstWhere('id', $selectedMajor); @endphp
+                            @if($activeMajor)
+                                <span class="badge badge-primary">{{ $activeMajor->code }}</span>
+                            @endif
+                        @endif
+
                         <span style="font-size:0.8rem;color:var(--muted-fg);">
                             — {{ $subjects->count() }} result(s)
                         </span>
                     </div>
                 @endif
+
+                <div id="filter-status" style="margin-top:0.75rem;font-size:0.8rem;color:var(--muted-fg);display:none;"></div>
             </form>
         </div>
 
@@ -105,7 +131,10 @@
             <div class="grid-4">
                 @foreach($subjects as $subject)
                     <a href="{{ route('subjects.show', $subject->id) }}"
-                       class="card category-card"
+                       class="card category-card subject-card"
+                       data-name="{{ strtolower($subject->name) }}"
+                       data-semester="{{ $subject->semester->name }}"
+                       data-majors="{{ $subject->majors->pluck('id')->join(',') }}"
                        style="padding:1.6rem;display:flex;flex-direction:column;gap:0.8rem;">
 
                         <div style="display:flex;align-items:center;gap:0.9rem;">
@@ -157,7 +186,60 @@
                     </a>
                 @endforeach
             </div>
+
+            <div id="no-results" style="display:none;" class="empty-state">
+                <div class="empty-state-icon">
+                    <i data-lucide="search-x" class="icon-lg"></i>
+                </div>
+                <h3>No subjects found</h3>
+                <p>Try a different search or filter.</p>
+            </div>
         @endif
     </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput    = document.getElementById('subject-search');
+            const semesterSelect = document.getElementById('subject-semester');
+            const majorSelect    = document.getElementById('subject-major');
+            const statusEl       = document.getElementById('filter-status');
+            const noResults      = document.getElementById('no-results');
+            const cards          = document.querySelectorAll('.subject-card');
+
+            function applyFilters() {
+                const words    = searchInput.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+                const semester = semesterSelect.value;
+                const major    = majorSelect.value;
+                const isActive = words.length > 0 || semester || major;
+
+                let visible = 0;
+
+                cards.forEach(function (card) {
+                    const name         = card.dataset.name;
+                    const cardSemester = card.dataset.semester;
+                    const cardMajors   = card.dataset.majors ? card.dataset.majors.split(',') : [];
+
+                    const matchesWords    = words.every(function (w) { return name.includes(w); });
+                    const matchesSemester = !semester || cardSemester === semester;
+                    const matchesMajor    = !major    || cardMajors.includes(major);
+
+                    const show = matchesWords && matchesSemester && matchesMajor;
+                    card.style.display = show ? '' : 'none';
+                    if (show) visible++;
+                });
+
+                if (noResults) noResults.style.display = visible === 0 ? 'block' : 'none';
+
+                if (statusEl) {
+                    statusEl.style.display = isActive ? 'block' : 'none';
+                    statusEl.textContent   = isActive ? '— ' + visible + ' result' + (visible !== 1 ? 's' : '') : '';
+                }
+            }
+
+            searchInput.addEventListener('input', applyFilters);
+            semesterSelect.addEventListener('change', applyFilters);
+            majorSelect.addEventListener('change', applyFilters);
+        });
+    </script>
 
 @endsection
