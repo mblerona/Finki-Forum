@@ -11,16 +11,13 @@ class SubjectSeeder extends Seeder
 {
     public function run(): void
     {
-
-//        // Wipe existing pivot and subjects to avoid duplicates
-//        \DB::table('major_subject')->truncate();
-//        Subject::truncate();
-        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \DB::statement('PRAGMA foreign_keys = OFF;');
 
         \DB::table('major_subject')->truncate();
         Subject::truncate();
 
-        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        \DB::statement('PRAGMA foreign_keys = ON;');
+
         // subject name => [semester number, [major codes]]
         $subjects = [
 

@@ -1,4 +1,8 @@
-<!DOCTYPE html>
+@php
+    /** @var \App\Models\User|null $authUser */
+    $authUser = auth()->user();
+@endphp
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,7 +11,6 @@
     <title>@yield('title', 'FINKI Forum')</title>
     <meta name="description" content="A forum for FINKI students to discuss subjects, threads, experiences, and resources">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-{{--    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>--}}
     <script src="{{ asset('js/lucide.js') }}"></script>
 </head>
 <body>
@@ -29,15 +32,12 @@
                 <a href="{{ route('home') }}" class="nav-link">
                     <i data-lucide="home" class="icon"></i> Home
                 </a>
-
                 <a href="{{ route('subjects.index') }}" class="nav-link">
                     <i data-lucide="book-open" class="icon"></i> Subjects
                 </a>
-
                 <a href="{{ route('majors.index') }}" class="nav-link">
                     <i data-lucide="graduation-cap" class="icon"></i> Majors
                 </a>
-
                 <a href="{{ route('semesters.index') }}" class="nav-link">
                     <i data-lucide="calendar" class="icon"></i> Semesters
                 </a>
@@ -61,9 +61,28 @@
 
             <div class="header-actions">
                 @auth
-                    <span style="font-size: 0.875rem; color: var(--muted-fg);">
-                        {{ auth()->user()->name }}
-                    </span>
+                    <a href="{{ route('profile.show') }}" style="
+                        display:inline-flex;align-items:center;gap:0.5rem;
+                        font-size:0.875rem;font-weight:500;
+                        color:var(--fg);text-decoration:none;
+                        padding:0.375rem 0.625rem;
+                        border-radius:var(--radius);
+                        transition:background 150ms ease;
+                    "
+                       onmouseover="this.style.background='var(--secondary)'"
+                       onmouseout="this.style.background='transparent'">
+                        <span style="
+                            width:1.75rem;height:1.75rem;
+                            border-radius:9999px;
+                            background:rgba(59,108,245,0.12);
+                            color:var(--primary);
+                            display:inline-flex;align-items:center;justify-content:center;
+                            font-size:0.625rem;font-weight:700;flex-shrink:0;
+                        ">
+                            {{ strtoupper(substr($authUser->name, 0, 2)) }}
+                        </span>
+                        {{ $authUser->name }}
+                    </a>
                     <form method="POST" action="{{ route('logout') }}" style="margin:0;">
                         @csrf
                         <button type="submit" class="btn btn-outline btn-sm">Logout</button>

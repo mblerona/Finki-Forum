@@ -19,7 +19,7 @@ class ForumDemoSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::statement('PRAGMA foreign_keys = OFF;');
 
         CommentDislike::truncate();
         CommentLike::truncate();
@@ -28,7 +28,7 @@ class ForumDemoSeeder extends Seeder
         Comment::truncate();
         Thread::truncate();
 
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        DB::statement('PRAGMA foreign_keys = ON;');
 
         $demoUsers = [
             ['name' => 'Test Student', 'email' => 'student@finki.edu.mk'],

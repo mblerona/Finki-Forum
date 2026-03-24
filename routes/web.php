@@ -6,6 +6,7 @@ use App\Http\Controllers\CommentLikeController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MajorController;
 use App\Http\Controllers\CommentsController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\SubjectController;
@@ -24,6 +25,10 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
+
+    // Profile
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     // Subjects
     Route::get('/subjects', [SubjectController::class, 'index'])->name('subjects.index');
